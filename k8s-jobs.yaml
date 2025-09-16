@@ -1,0 +1,107 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tasks-planner-bench
+  namespace: test-task
+spec:
+  selector:
+    matchLabels:
+      app: tasks-planner-bench
+  template:
+    metadata:
+      labels:
+        app: tasks-planner-bench
+    spec:
+      containers:
+        - name: planner
+          image: ghcr.io/hufs-mco/test-task:latest
+          args: ["planner"]
+          volumeMounts:
+          - name: shared-socket
+            mountPath: /tmp
+      volumes:
+      - name: shared-socket
+        hostPath:
+          path: /tmp/e2e-shared-sockets
+          type: DirectoryOrCreate
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tasks-ekf-bench
+  namespace: test-task
+spec:
+  selector:
+    matchLabels:
+      app: tasks-ekf-bench
+  template:
+    metadata:
+      labels:
+        app: tasks-ekf-bench
+    spec:
+      containers:
+        - name: ekf
+          image: ghcr.io/hufs-mco/test-task:latest
+          args: ["ekf"]
+          volumeMounts:
+          - name: shared-socket
+            mountPath: /tmp
+      volumes:
+      - name: shared-socket
+        hostPath:
+          path: /tmp/e2e-shared-sockets
+          type: DirectoryOrCreate
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tasks-localization-bench
+  namespace: test-task
+spec:
+  selector:
+    matchLabels:
+      app: tasks-localization-bench
+  template:
+    metadata:
+      labels:
+        app: tasks-localization-bench
+    spec:
+      containers:
+        - name: localization
+          image: ghcr.io/hufs-mco/test-task:latest
+          args: ["localization"]
+          volumeMounts:
+          - name: shared-socket
+            mountPath: /tmp
+      volumes:
+      - name: shared-socket
+        hostPath:
+          path: /tmp/e2e-shared-sockets
+          type: DirectoryOrCreate
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tasks-lidar-bench
+  namespace: test-task
+spec:
+  selector:
+    matchLabels:
+      app: tasks-lidar-bench
+  template:
+    metadata:
+      labels:
+        app: tasks-lidar-bench
+    spec:
+      containers:
+        - name: lidar
+          image: ghcr.io/hufs-mco/test-task:latest  
+          args: ["lidar"]
+          volumeMounts:
+          - name: shared-socket
+            mountPath: /tmp
+      volumes:
+      - name: shared-socket
+        hostPath:
+          path: /tmp/e2e-shared-sockets
+          type: DirectoryOrCreate

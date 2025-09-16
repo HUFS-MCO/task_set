@@ -2,9 +2,11 @@
 
 echo "Compiling all processes with -O0 -std=c++17..."
 
-g++ -O0 -std=c++17 -o planner planner_main.cpp
-g++ -O0 -std=c++17 -o ekf ekf_main.cpp
-g++ -O0 -std=c++17 -o localization localization_main.cpp
-g++ -O0 -std=c++17 -o lidar lidar_main.cpp
+CXXFLAGS="-O0 -std=c++17 -static-libstdc++ -static-libgcc"
+
+g++ $CXXFLAGS -o planner planner_main.cpp
+g++ $CXXFLAGS -o ekf ekf_main.cpp
+g++ $CXXFLAGS -o localization localization_main.cpp
+g++ $CXXFLAGS -o lidar lidar_main.cpp
 
 echo "Build complete."

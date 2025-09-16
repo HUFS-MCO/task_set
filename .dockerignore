@@ -1,0 +1,25 @@
+# Exclude VCS
+.git
+.gitignore
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Build artifacts
+planner
+ekf
+localization
+lidar
+*.o
+*.a
+*.so
+build/
+
+# Other
+*.log
+*.csv
