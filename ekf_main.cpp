@@ -30,7 +30,6 @@ int main() {
 
     std::thread recv_thread([&] { // UDS Error Sol
         char buf[128];
-        std::string recv_buffer;
         while (!should_exit) {
             int n = read(recv_fd, buf, sizeof(buf));
             if (n == 0) {
@@ -38,19 +37,14 @@ int main() {
                 break;
             }
             if (n > 0) {
-                recv_buffer.append(buf, n);
-                size_t pos;
-                while ((pos = recv_buffer.find('\n')) != std::string::npos) {
-                    std::string line = recv_buffer.substr(0, pos);
-                    recv_buffer.erase(0, pos + 1);
-                    if (line == "END") {
-                        should_exit = true;
-                        break;
-                    }
-                    std::lock_guard<std::mutex> lock(msg_mutex);
-                    latest_msg = line;
-                    //std::cout << "[EKF] Received: " << latest_msg << "\n";
+                std::string msg(buf, n);
+                if (msg == "END") {
+                    should_exit = true;
+                    break;
                 }
+                std::lock_guard<std::mutex> lock(msg_mutex);
+                latest_msg = msg;
+                //std::cout << "[EKF] Received: " << latest_msg << "\n";
             }
         }
     });
@@ -74,7 +68,7 @@ int main() {
 
         // 작업 완료 시점에 work_start_time을 그대로 전송 (이전 값과 다르면)
         if (!current_msg.empty() && current_msg != prev_msg) {
-            std::string msg_to_send = current_msg + "\n"; // work_start_time 그대로 전달
+            std::string msg_to_send = current_msg; // work_start_time 그대로 전달
             write(send_fd, msg_to_send.c_str(), msg_to_send.size());
             prev_msg = current_msg;
         }
@@ -92,7 +86,7 @@ int main() {
     }
 
     // END 신호를 다음 프로세스(planner)에 전달
-    write(send_fd, "END\n", 4);
+    write(send_fd, "END", 3);
     // 수신 스레드가 종료될 때까지 대기
     recv_thread.join();
 
