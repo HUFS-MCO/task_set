@@ -14,7 +14,7 @@ std::mutex msg_mutex;
 std::atomic<bool> should_exit{false};
 
 int main() {
-    DummyTask planner_func("PLANNER_Function", 24000); // 12ms × 1136 = 13632 iteration
+    DummyTask planner_func("PLANNER_Function", 2400); // 12ms × 1136 = 13632 iteration
     const int cycle_period_ms = 15;
     const int repeat_count = 2000;
 
@@ -72,10 +72,12 @@ int main() {
         if (!current_msg.empty() && current_msg != prev_msg) {
             long long e2e_latency = current_time_ms() - std::stoll(current_msg); // current_system_time_ms 사용했었음
             e2e_file << cycle << "," << e2e_latency << "\n";
+            e2e_file.flush();
             prev_msg = current_msg;
         }
 
         cycle_file << cycle << "," << cycle_elapsed << "\n";
+        cycle_file.flush();
 
         if (cycle_elapsed < cycle_period_ms)
             std::this_thread::sleep_for(std::chrono::milliseconds(cycle_period_ms - cycle_elapsed));

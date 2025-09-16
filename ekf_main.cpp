@@ -15,7 +15,7 @@ std::mutex msg_mutex;
 std::atomic<bool> should_exit{false};
 
 int main() {
-    DummyTask ekf_func("EKF_Function", 8000);      // 4ms × 1136 = 4544 iteration
+    DummyTask ekf_func("EKF_Function", 800);      // 4ms × 1136 = 4544 iteration
     const int cycle_period_ms = 15;
     const int repeat_count = 2000;
 
@@ -74,6 +74,7 @@ int main() {
         }
 
         cycle_file << cycle << "," << cycle_elapsed << "\n";
+        cycle_file.flush();
 
         if (cycle_elapsed < cycle_period_ms)
             std::this_thread::sleep_for(std::chrono::milliseconds(cycle_period_ms - cycle_elapsed));

@@ -46,6 +46,10 @@ spec:
           volumeMounts:
           - name: shared-socket
             mountPath: /tmp
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "rm -f /tmp/ekf_to_planner.sock || true"]
       volumes:
       - name: shared-socket
         hostPath:
@@ -73,6 +77,10 @@ spec:
           volumeMounts:
           - name: shared-socket
             mountPath: /tmp
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "rm -f /tmp/localization_to_ekf.sock || true"]
       volumes:
       - name: shared-socket
         hostPath:
@@ -100,6 +108,10 @@ spec:
           volumeMounts:
           - name: shared-socket
             mountPath: /tmp
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "rm -f /tmp/lidar_to_localization.sock || true"]
       volumes:
       - name: shared-socket
         hostPath:

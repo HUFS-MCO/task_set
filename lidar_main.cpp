@@ -12,7 +12,7 @@ std::vector<std::string> log_buffer;
 std::mutex log_mutex;
 
 int main() {
-    DummyTask lidar_func("Lidar_Function", 21500);      // 11ms × 1136 = 12496 iteration
+    DummyTask lidar_func("Lidar_Function", 2150);      // 11ms × 1136 = 12496 iteration
 
     const int cycle_period_ms = 33; // 33ms 주기
     const int repeat_count = 1000; 
@@ -50,6 +50,7 @@ int main() {
 
         // 전체 사이클 시간 계산 및 대기
         cycle_file << cycle << "," << cycle_elapsed << "\n";// 저장용
+        cycle_file.flush();
 
 
         log_event("Main", "Cycle " + std::to_string(cycle) + " actual execution time: " + std::to_string(cycle_elapsed) + "ms");
