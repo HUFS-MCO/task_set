@@ -30,7 +30,6 @@ int main() {
 
     std::thread recv_thread([&] {
         char buf[128];
-        std::string recv_buffer;
         while (!should_exit) {
             int n = read(recv_fd, buf, sizeof(buf));
             if (n == 0) {
@@ -38,19 +37,14 @@ int main() {
                 break;
             }
             if (n > 0) {
-                recv_buffer.append(buf, n);
-                size_t pos;
-                while ((pos = recv_buffer.find('\n')) != std::string::npos) {
-                    std::string line = recv_buffer.substr(0, pos);
-                    recv_buffer.erase(0, pos + 1);
-                    if (line == "END") {
-                        should_exit = true;
-                        break;
-                    }
-                    std::lock_guard<std::mutex> lock(msg_mutex);
-                    latest_msg = line;
-                    //std::cout << "[PLANNER] Received: " << latest_msg << "\n";
+                std::string msg(buf, n);
+                if (msg == "END") {
+                    should_exit = true;
+                    break;
                 }
+                std::lock_guard<std::mutex> lock(msg_mutex);
+                latest_msg = msg;
+                //std::cout << "[PLANNER] Received: " << latest_msg << "\n";
             }
         }
     });
