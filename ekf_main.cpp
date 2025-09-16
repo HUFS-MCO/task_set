@@ -15,7 +15,7 @@ std::mutex msg_mutex;
 std::atomic<bool> should_exit{false};
 
 int main() {
-    DummyTask ekf_func("EKF_Function", 8000);      // 4ms × 1136 = 4544 iteration
+    DummyTask ekf_func("EKF_Function", 800);      // 4ms × 1136 = 4544 iteration
     const int cycle_period_ms = 15;
     const int repeat_count = 2000;
 
@@ -30,6 +30,7 @@ int main() {
 
     std::thread recv_thread([&] { // UDS Error Sol
         char buf[128];
+        std::string recv_buffer;
         while (!should_exit) {
             int n = read(recv_fd, buf, sizeof(buf));
             if (n == 0) {
@@ -37,14 +38,19 @@ int main() {
                 break;
             }
             if (n > 0) {
-                std::string msg(buf, n);
-                if (msg == "END") {
-                    should_exit = true;
-                    break;
+                recv_buffer.append(buf, n);
+                size_t pos;
+                while ((pos = recv_buffer.find('\n')) != std::string::npos) {
+                    std::string line = recv_buffer.substr(0, pos);
+                    recv_buffer.erase(0, pos + 1);
+                    if (line == "END") {
+                        should_exit = true;
+                        break;
+                    }
+                    std::lock_guard<std::mutex> lock(msg_mutex);
+                    latest_msg = line;
+                    //std::cout << "[EKF] Received: " << latest_msg << "\n";
                 }
-                std::lock_guard<std::mutex> lock(msg_mutex);
-                latest_msg = msg;
-                //std::cout << "[EKF] Received: " << latest_msg << "\n";
             }
         }
     });
@@ -68,12 +74,13 @@ int main() {
 
         // 작업 완료 시점에 work_start_time을 그대로 전송 (이전 값과 다르면)
         if (!current_msg.empty() && current_msg != prev_msg) {
-            std::string msg_to_send = current_msg; // work_start_time 그대로 전달
+            std::string msg_to_send = current_msg + "\n"; // work_start_time 그대로 전달
             write(send_fd, msg_to_send.c_str(), msg_to_send.size());
             prev_msg = current_msg;
         }
 
         cycle_file << cycle << "," << cycle_elapsed << "\n";
+        cycle_file.flush();
 
         if (cycle_elapsed < cycle_period_ms)
             std::this_thread::sleep_for(std::chrono::milliseconds(cycle_period_ms - cycle_elapsed));
@@ -85,7 +92,7 @@ int main() {
     }
 
     // END 신호를 다음 프로세스(planner)에 전달
-    write(send_fd, "END", 3);
+    write(send_fd, "END\n", 4);
     // 수신 스레드가 종료될 때까지 대기
     recv_thread.join();
 

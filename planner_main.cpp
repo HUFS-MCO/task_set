@@ -14,7 +14,7 @@ std::mutex msg_mutex;
 std::atomic<bool> should_exit{false};
 
 int main() {
-    DummyTask planner_func("PLANNER_Function", 24000); // 12ms × 1136 = 13632 iteration
+    DummyTask planner_func("PLANNER_Function", 2400); // 12ms × 1136 = 13632 iteration
     const int cycle_period_ms = 15;
     const int repeat_count = 2000;
 
@@ -30,6 +30,7 @@ int main() {
 
     std::thread recv_thread([&] {
         char buf[128];
+        std::string recv_buffer;
         while (!should_exit) {
             int n = read(recv_fd, buf, sizeof(buf));
             if (n == 0) {
@@ -37,14 +38,19 @@ int main() {
                 break;
             }
             if (n > 0) {
-                std::string msg(buf, n);
-                if (msg == "END") {
-                    should_exit = true;
-                    break;
+                recv_buffer.append(buf, n);
+                size_t pos;
+                while ((pos = recv_buffer.find('\n')) != std::string::npos) {
+                    std::string line = recv_buffer.substr(0, pos);
+                    recv_buffer.erase(0, pos + 1);
+                    if (line == "END") {
+                        should_exit = true;
+                        break;
+                    }
+                    std::lock_guard<std::mutex> lock(msg_mutex);
+                    latest_msg = line;
+                    //std::cout << "[PLANNER] Received: " << latest_msg << "\n";
                 }
-                std::lock_guard<std::mutex> lock(msg_mutex);
-                latest_msg = msg;
-                //std::cout << "[PLANNER] Received: " << latest_msg << "\n";
             }
         }
     });
@@ -72,6 +78,7 @@ int main() {
         if (!current_msg.empty() && current_msg != prev_msg) {
             long long e2e_latency = current_time_ms() - std::stoll(current_msg); // current_system_time_ms 사용했었음
             e2e_file << cycle << "," << e2e_latency << "\n";
+            e2e_file.flush();
             prev_msg = current_msg;
         }
 

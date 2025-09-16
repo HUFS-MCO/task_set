@@ -12,7 +12,7 @@ std::vector<std::string> log_buffer;
 std::mutex log_mutex;
 
 int main() {
-    DummyTask lidar_func("Lidar_Function", 21500);      // 11ms × 1136 = 12496 iteration
+    DummyTask lidar_func("Lidar_Function", 2150);      // 11ms × 1136 = 12496 iteration
 
     const int cycle_period_ms = 33; // 33ms 주기
     const int repeat_count = 1000; 
@@ -44,12 +44,13 @@ int main() {
         auto end_time = current_time_ms(); // 원래 current_system_time_ms 사용했었음
 
         // 작업이 끝난 후, work_start_time을 UDS로 송신
-        std::string msg = std::to_string(end_time);
+        std::string msg = std::to_string(end_time)+"\n";
         write(uds_fd, msg.c_str(), msg.size());
         // std::cout << "[LIDAR] Sent message: " << msg << " at " << sent_time << "ms" << std::endl;
 
         // 전체 사이클 시간 계산 및 대기
         cycle_file << cycle << "," << cycle_elapsed << "\n";// 저장용
+        cycle_file.flush();
 
 
         log_event("Main", "Cycle " + std::to_string(cycle) + " actual execution time: " + std::to_string(cycle_elapsed) + "ms");

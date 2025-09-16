@@ -14,7 +14,7 @@ std::mutex msg_mutex;
 std::atomic<bool> should_exit{false};
 
 int main() {
-    DummyTask localization_func("LOCALIZATION_Function", 280000);      // 139ms × 1136 = 157904 iteration
+    DummyTask localization_func("LOCALIZATION_Function", 28000);      // 139ms × 1136 = 157904 iteration
     const int cycle_period_ms = 400;
     const int repeat_count = 100;
 
@@ -56,7 +56,7 @@ int main() {
         std::string current_msg;
         {
             std::lock_guard<std::mutex> lock(msg_mutex);
-            current_msg = latest_msg;
+            current_msg = latest_msg+"\n";
         }
 
         std::thread t([&] { localization_func.run_once(); });
@@ -72,6 +72,7 @@ int main() {
         }
 
         cycle_file << cycle << "," << cycle_elapsed << "\n";
+        cycle_file.flush();
 
         if (cycle_elapsed < cycle_period_ms)
             std::this_thread::sleep_for(std::chrono::milliseconds(cycle_period_ms - cycle_elapsed));
