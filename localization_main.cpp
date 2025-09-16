@@ -56,7 +56,7 @@ int main() {
         std::string current_msg;
         {
             std::lock_guard<std::mutex> lock(msg_mutex);
-            current_msg = latest_msg+"\n";
+            current_msg = latest_msg;
         }
 
         std::thread t([&] { localization_func.run_once(); });
