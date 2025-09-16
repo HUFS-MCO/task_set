@@ -83,6 +83,7 @@ int main() {
         }
 
         cycle_file << cycle << "," << cycle_elapsed << "\n";
+        cycle_file.flush();
 
         if (cycle_elapsed < cycle_period_ms)
             std::this_thread::sleep_for(std::chrono::milliseconds(cycle_period_ms - cycle_elapsed));
