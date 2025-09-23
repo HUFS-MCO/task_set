@@ -12,6 +12,7 @@ std::vector<std::string> log_buffer;
 std::mutex log_mutex;
 
 int main() {
+    int pid = getpid()
     DummyTask lidar_func("Lidar_Function", 2150);      // 11ms × 1136 = 12496 iteration
 
     const int cycle_period_ms = 33; // 33ms 주기
@@ -39,6 +40,7 @@ int main() {
             lidar_func.run_once();
         });
         t2.join();
+        kill(pid, SIGUSR1);
 
         auto cycle_elapsed = current_time_ms() - cycle_start;
         auto end_time = current_time_ms(); // 원래 current_system_time_ms 사용했었음

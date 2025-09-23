@@ -14,6 +14,7 @@ std::mutex msg_mutex;
 std::atomic<bool> should_exit{false};
 
 int main() {
+    int pid = getpid()
     DummyTask planner_func("PLANNER_Function", 2400); // 12ms × 1136 = 13632 iteration
     const int cycle_period_ms = 15;
     const int repeat_count = 2000;
@@ -63,6 +64,7 @@ int main() {
 
         std::thread t([&] { planner_func.run_once(); });
         t.join();
+        kill(pid, SIGUSR1);
 
         auto cycle_elapsed = current_time_ms() - cycle_start;
 

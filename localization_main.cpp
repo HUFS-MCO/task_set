@@ -14,6 +14,7 @@ std::mutex msg_mutex;
 std::atomic<bool> should_exit{false};
 
 int main() {
+    int pid = getpid()
     DummyTask localization_func("LOCALIZATION_Function", 28000);      // 139ms × 1136 = 157904 iteration
     const int cycle_period_ms = 400;
     const int repeat_count = 100;
@@ -61,6 +62,7 @@ int main() {
 
         std::thread t([&] { localization_func.run_once(); });
         t.join();
+        kill(pid, SIGUSR1);
 
         auto cycle_elapsed = current_time_ms() - cycle_start;
 

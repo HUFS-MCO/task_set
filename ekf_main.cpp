@@ -15,6 +15,7 @@ std::mutex msg_mutex;
 std::atomic<bool> should_exit{false};
 
 int main() {
+    int pid = getpid()
     DummyTask ekf_func("EKF_Function", 800);      // 4ms × 1136 = 4544 iteration
     const int cycle_period_ms = 15;
     const int repeat_count = 2000;
@@ -63,6 +64,7 @@ int main() {
 
         std::thread t([&] { ekf_func.run_once(); });
         t.join();
+        kill(pid, SIGUSR1);
 
         auto cycle_elapsed = current_time_ms() - cycle_start;
 
