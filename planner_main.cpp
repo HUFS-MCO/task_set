@@ -25,7 +25,7 @@ int main() {
         return 1;
     }
 
-    DummyTask planner_func("PLANNER_Function", 2400); // 12ms × 1136 = 13632 iteration
+    DummyTask planner_func("PLANNER_Function", 1646); // 12ms × 1136 = 13632 iteration
 
     int recv_fd = create_uds_server("/tmp/ekf_to_planner.sock");
     sleep(1);

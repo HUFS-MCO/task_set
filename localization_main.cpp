@@ -25,7 +25,7 @@ int main() {
         return 1;
     }
 
-    DummyTask localization_func("LOCALIZATION_Function", 28000);      // 139ms × 1136 = 157904 iteration
+    DummyTask localization_func("LOCALIZATION_Function", 19081);      // 139ms × 1136 = 157904 iteration
 
     int recv_fd = create_uds_server("/tmp/lidar_to_localization.sock");
     int send_fd = connect_uds_client("/tmp/localization_to_ekf.sock");

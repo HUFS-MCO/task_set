@@ -25,7 +25,7 @@ int main() {
         return 1;
     }
 
-    DummyTask ekf_func("EKF_Function", 800);      // 4ms × 1136 = 4544 iteration
+    DummyTask ekf_func("EKF_Function", 550);      // 4ms × 1136 = 4544 iteration
 
     int recv_fd = create_uds_server("/tmp/localization_to_ekf.sock");
     int send_fd = connect_uds_client("/tmp/ekf_to_planner.sock");

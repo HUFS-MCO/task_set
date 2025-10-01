@@ -23,7 +23,7 @@ int main() {
         return 1;
     }
 
-    DummyTask lidar_func("Lidar_Function", 2150);      // 11ms × 1136 = 12496 iteration
+    DummyTask lidar_func("Lidar_Function", 1515);      // 11ms × 1136 = 12496 iteration
 
     std::ofstream cycle_file("lidar_cycle_times.csv");// 저장용
     cycle_file << "cycle_elapsed_ms\n";// 저장용
