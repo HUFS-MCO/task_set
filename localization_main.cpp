@@ -10,6 +10,7 @@
 #include <sched.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h> // clock_nanosleep을 위해 추가
 
 std::string latest_msg;
 std::string prev_msg;
@@ -56,8 +57,15 @@ int main() {
             }
         }
     });
+    // 3. 주기적 실행을 위한 시간 설정
+    struct timespec next_activation;
+    const long PERIOD_NS = 400 * 1000 * 1000; // 33ms를 나노초로 변환
 
-    auto cycle_start = current_time_ms();
+    // 첫 번째 활성화 시간을 현재 시간으로 설정
+    clock_gettime(CLOCK_MONOTONIC, &next_activation);
+
+    for (int i=0; i<100; ++i){
+        auto cycle_start = current_time_ms();
 
     // 작업 시작 시점에 최신 메시지(work_start_time) 저장
     std::string current_msg;
@@ -66,23 +74,35 @@ int main() {
         current_msg = latest_msg;
     }
 
+        std::thread t([&] { localization_func.run_once(); });
+        t.join();
 
-    std::thread t([&] { localization_func.run_once(); });
-    t.join();
+        auto cycle_elapsed = current_time_ms() - cycle_start;
 
-    auto cycle_elapsed = current_time_ms() - cycle_start;
+        // 작업 완료 시점에 work_start_time을 그대로 전송
+        if (!current_msg.empty() && current_msg != prev_msg) {
+            std::string msg_to_send = current_msg; // work_start_time 그대로 전달
+            write(send_fd, msg_to_send.c_str(), msg_to_send.size());
+            prev_msg = current_msg;
+        }
 
-    // 작업 완료 시점에 work_start_time을 그대로 전송
-    if (!current_msg.empty() && current_msg != prev_msg) {
-        std::string msg_to_send = current_msg; // work_start_time 그대로 전달
-        write(send_fd, msg_to_send.c_str(), msg_to_send.size());
-        prev_msg = current_msg;
+        cycle_file << cycle_elapsed << "\n";
+        cycle_file.flush();
+
+        localization_func.reset();
+        // --- 다음 활성화 시간까지 대기 ---
+        // 이전 활성화 시간에 주기를 더하여 다음 활성화 시간 계산
+        next_activation.tv_nsec += PERIOD_NS;
+        // 나노초가 1초를 넘어가면 초(second) 단위로 올림 처리
+        while (next_activation.tv_nsec >= 1000000000) {
+            next_activation.tv_nsec -= 1000000000;
+            next_activation.tv_sec++;
+        }
+
+        // clock_nanosleep을 사용하여 계산된 절대 시간까지 프로세스를 재움
+        // TIMER_ABSTIME 플래그는 드리프트(drift) 누적을 방지하여 정밀한 주기를 보장
+        clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_activation, NULL);
     }
-
-    cycle_file << cycle_elapsed << "\n";
-    cycle_file.flush();
-
-    localization_func.reset();
 
     // END 신호를 다음 프로세스(ekf)에 전달
     write(send_fd, "END", 3);
