@@ -12,5 +12,5 @@ RUN sed -i 's/\r$//' /app/build_all.sh \
 COPY run.sh /app/run.sh
 RUN chmod +x /app/run.sh
 
-ENTRYPOINT ["/app/run.sh"]
+#ENTRYPOINT ["/app/run.sh"]
 CMD ["--help"]
