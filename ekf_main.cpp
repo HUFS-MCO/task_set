@@ -27,6 +27,7 @@ int main() {
 
     DummyTask ekf_func("EKF_Function", 550);      // 4ms × 1136 = 4544 iteration
 
+
     int recv_fd = create_uds_server("/tmp/localization_to_ekf.sock");
     int send_fd = connect_uds_client("/tmp/ekf_to_planner.sock");
     sleep(1);
@@ -58,6 +59,7 @@ int main() {
     });
 
     auto cycle_start = current_time_ms();
+
 
     // 작업 시작 시점에 최신 메시지(work_start_time) 저장
     std::string current_msg;

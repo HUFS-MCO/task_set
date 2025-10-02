@@ -18,6 +18,7 @@ int main() {
     struct sched_param param;
     param.sched_priority = 99;
 
+
     if (sched_setscheduler(0, SCHED_FIFO, &param) == -1) {
         perror("sched_setscheduler 실패");
         return 1;
@@ -44,6 +45,7 @@ int main() {
 
     auto cycle_elapsed = current_time_ms() - cycle_start;
     auto end_time = current_time_ms(); // 원래 current_system_time_ms 사용했었음
+
 
     // 작업이 끝난 후, work_start_time을 UDS로 송신
     std::string msg = std::to_string(end_time);

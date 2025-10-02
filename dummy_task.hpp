@@ -132,7 +132,7 @@ public:
         iteration_count++;
         // 각 행의 합 3*5.5=16.5, 구간 [1,10]
         const double row_sum = 16.5;
-        auto XA = randfixedsum(3, 3, row_sum, 1.0, 10.0, gen);
+        auto XA = randfixedsum(7, 7, row_sum, 1.0, 10.0, gen);
         }
         auto end_time = current_time_ms();
         auto actual_duration = end_time - start_time;

@@ -27,6 +27,7 @@ int main() {
 
     DummyTask localization_func("LOCALIZATION_Function", 19081);      // 139ms × 1136 = 157904 iteration
 
+
     int recv_fd = create_uds_server("/tmp/lidar_to_localization.sock");
     int send_fd = connect_uds_client("/tmp/localization_to_ekf.sock");
     sleep(1);
@@ -64,6 +65,7 @@ int main() {
         std::lock_guard<std::mutex> lock(msg_mutex);
         current_msg = latest_msg;
     }
+
 
     std::thread t([&] { localization_func.run_once(); });
     t.join();

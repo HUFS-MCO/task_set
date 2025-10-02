@@ -27,6 +27,7 @@ int main() {
 
     DummyTask planner_func("PLANNER_Function", 1646); // 12ms × 1136 = 13632 iteration
 
+
     int recv_fd = create_uds_server("/tmp/ekf_to_planner.sock");
     sleep(1);
     std::cout <<"-------[planner main start]-----------------------------------------------------------------------------------" <<std::endl;
@@ -66,6 +67,7 @@ int main() {
         std::lock_guard<std::mutex> lock(msg_mutex);
         current_msg = latest_msg;
     }
+
 
     std::thread t([&] { planner_func.run_once(); });
     t.join();
