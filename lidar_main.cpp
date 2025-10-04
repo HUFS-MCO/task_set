@@ -56,7 +56,7 @@ int main() {
     auto end_time = current_time_ms(); // 원래 current_system_time_ms 사용했었음
 
         // 작업이 끝난 후, work_start_time을 UDS로 송신
-        std::string msg = std::to_string(end_time);
+        std::string msg = std::to_string(end_time) + "\n";
         write(uds_fd, msg.c_str(), msg.size());
 
         cycle_file << cycle_elapsed << "\n";// 저장용

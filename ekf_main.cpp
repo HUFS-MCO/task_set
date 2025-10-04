@@ -85,7 +85,7 @@ int main() {
 
         // 작업 완료 시점에 work_start_time을 그대로 전송 (이전 값과 다르면)
         if (!current_msg.empty() && current_msg != prev_msg) {
-        std::string msg_to_send = current_msg; // work_start_time 그대로 전달
+        std::string msg_to_send = current_msg + "\n"; // work_start_time 그대로 전달
             write(send_fd, msg_to_send.c_str(), msg_to_send.size());
             prev_msg = current_msg;
         }
