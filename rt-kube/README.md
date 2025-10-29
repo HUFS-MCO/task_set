@@ -1,0 +1,1 @@
+~/task_set/rt-kube$ sudo docker build -t ghcr.io/hufs-mco/rt-kube-task:equal . --push
