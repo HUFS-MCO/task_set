@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 
-#define PERIOD 0.5
+#define PERIOD 500000
 
 static void sig_thread(int sig);
 static void sig_thread_end(int sig);
@@ -58,7 +58,7 @@ static void sig_thread(int sig) {
 static void * sleepy_wait(void * arg) {
 	setpriority(PRIO_PROCESS, 0, 19);
 	while(sleepy_wait_continue) {
-		sleep(PERIOD);
+		usleep(PERIOD);
 	}
 }
 
@@ -70,6 +70,8 @@ static void * period_send(void * arg) {
 		sigxcpu_counter_difference = sigxcpu_counter-sigxcpu_counter_last_sent;
 		if (sigxcpu_counter_difference > 0) {
 			zero_sent = 0;
+			printf("📊 SIGXCPU update - Total: %d, Period: %d (new misses in last %.1fs)\n",
+				sigxcpu_counter, sigxcpu_counter_difference, PERIOD);
 		}
 		if (sigxcpu_counter_difference >= 0 && !zero_sent) {
 			sprintf(command_insert_numbers, command_patch, sigxcpu_counter, sigxcpu_counter_difference);
@@ -79,7 +81,7 @@ static void * period_send(void * arg) {
 				zero_sent = 1;
 			}
 		}
-		sleep(PERIOD);
+		usleep(PERIOD);
 	}
 }
 
