@@ -1,0 +1,17 @@
+# Ignore build artifacts
+eq_task
+*.o
+*.out
+
+# Ignore CSV output files
+*.csv
+
+# Ignore Git files
+.git
+.gitignore
+
+# Ignore documentation
+README.md
+
+# Ignore Kubernetes manifests (not needed in image)
+k8s-*.yaml
