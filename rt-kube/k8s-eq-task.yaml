@@ -27,6 +27,7 @@ spec:
         app: eq-task
         scheduling.francescol96.univr: example-realtime-data
     spec:
+      serviceAccountName: eq-task-monitoring-sa
       containers:
       - name: eq-task
         image: ghcr.io/hufs-mco/rt-kube-task:equal
@@ -63,4 +64,34 @@ spec:
         # Keep container running after task completes
         stdin: true
         tty: true
+---
+# ServiceAccount for monitoring.h to create/update Monitoring CRDs
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: eq-task-monitoring-sa
+---
+# Role to allow creating and updating Monitoring CRDs
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: eq-task-monitoring-role
+rules:
+- apiGroups: ["rt.francescol96.univr"]
+  resources: ["monitorings"]
+  verbs: ["get", "list", "create", "update", "patch"]
+---
+# RoleBinding to bind the role to the service account
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: eq-task-monitoring-binding
+subjects:
+- kind: ServiceAccount
+  name: eq-task-monitoring-sa
+  namespace: default
+roleRef:
+  kind: Role
+  name: eq-task-monitoring-role
+  apiGroup: rbac.authorization.k8s.io
 
