@@ -40,19 +40,36 @@
 #endif
 
 int main() {
+    // Get runtime from environment variable, default to 4ms
+    const char* runtime_env = getenv("RUNTIME_MS");
+    int runtime_ms = runtime_env ? atoi(runtime_env) : 4;
+    uint64_t runtime_ns = runtime_ms * 1000ULL * 1000ULL;  // Convert ms to ns
+    
+    // Get deadline from environment variable, default to 20ms
+    const char* deadline_env = getenv("DEADLINE_MS");
+    int deadline_ms = deadline_env ? atoi(deadline_env) : 20;
+    uint64_t deadline_ns = deadline_ms * 1000ULL * 1000ULL;  // Convert ms to ns
+    
+    // Get period from environment variable, default to 20ms
+    const char* period_env = getenv("PERIOD_MS");
+    int period_ms = period_env ? atoi(period_env) : 20;
+    uint64_t period_ns = period_ms * 1000ULL * 1000ULL;  // Convert ms to ns
+
     struct sched_attr attr;
     memset(&attr, 0, sizeof(attr));
     attr.size = sizeof(attr);
     attr.sched_policy = SCHED_DEADLINE;
     attr.sched_flags = SCHED_FLAG_DL_OVERRUN;
-    attr.sched_runtime = RUNTIME_NS;
-    attr.sched_deadline = DEADLINE_NS;
-    attr.sched_period = PERIOD_NS;
+    attr.sched_runtime = runtime_ns;
+    attr.sched_deadline = deadline_ns;
+    attr.sched_period = period_ns;
 
     monitor();
 
     printf("sizeof(attr) = %zu\n", sizeof(attr));
     printf("🟢 SCHED_DEADLINE test starting (tid=%ld)\n", (long)syscall(SYS_gettid));
+    printf("⚙️  Runtime: %dms, Deadline: %dms, Period: %dms\n", 
+           runtime_ms, deadline_ms, period_ms);
     //printf("🟢 SCHED_DEADLINE test starting (tid=%ld)\n", gettid());
     if (syscall(SYS_sched_setattr, 0, &attr, 0) < 0) {
         perror("sched_setattr");
