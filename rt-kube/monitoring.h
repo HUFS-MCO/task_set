@@ -50,9 +50,13 @@ void monitor() {
 	pthread_create(&this_thread, NULL, period_send, NULL);
 }
 
+struct timespec ts;
+
 static void sig_thread(int sig) {
-    printf("SIGXCPU received!\n");
-    sigxcpu_counter++;
+	sigxcpu_counter++;
+	clock_gettime(CLOCK_REALTIME, &ts);
+	printf("[%d] SIGXCPU received at %ld.%09ld (absolute time)\n", 
+		sigxcpu_counter,ts.tv_sec, ts.tv_nsec);
 }
 
 static void * sleepy_wait(void * arg) {
@@ -70,8 +74,8 @@ static void * period_send(void * arg) {
 		sigxcpu_counter_difference = sigxcpu_counter-sigxcpu_counter_last_sent;
 		if (sigxcpu_counter_difference > 0) {
 			zero_sent = 0;
-			printf("📊 SIGXCPU update - Total: %d, Period: %d (new misses in last %.1fs)\n",
-				sigxcpu_counter, sigxcpu_counter_difference, PERIOD);
+			//printf("📊 SIGXCPU update - Total: %d, Period: %d (new misses in last %.1fs)\n",
+			//	sigxcpu_counter, sigxcpu_counter_difference, PERIOD);
 		}
 		if (sigxcpu_counter_difference >= 0 && !zero_sent) {
 			sprintf(command_insert_numbers, command_patch, sigxcpu_counter, sigxcpu_counter_difference);
