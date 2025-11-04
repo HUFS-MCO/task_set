@@ -1,0 +1,58 @@
+apiVersion: mcoperator.sdv.com/v1
+kind: McKube
+metadata:
+  name: example-realtime-data
+  namespace: default
+spec:
+  podname: "eq-task-statefulset-0"  # StatefulSet Pod 이름과 매칭
+  criticality: "High"
+  rtSettings:
+    period: 20000
+    runtime_low: 4000      # 4ms runtime
+    runtime_hi: 4000       # 4ms runtime
+    core: "2"           # Use core 2
+
+---
+apiVersion: mcoperator.sdv.com/v1
+kind: McKube
+metadata:
+  name: example-realtime-data-a
+  namespace: default
+spec:
+  podname: "eq-task-statefulset-1"  # StatefulSet Pod 이름과 매칭
+  criticality: "High"
+  rtSettings:
+    period: 20000
+    runtime_low: 4000      # 4ms runtime
+    runtime_hi: 4000       # 4ms runtime
+    core: "2"           # Use core 2
+
+---
+apiVersion: mcoperator.sdv.com/v1
+kind: McKube
+metadata:
+  name: example-realtime-data-b
+  namespace: default
+spec:
+  podname: "eq-task-statefulset-2"  # StatefulSet Pod 이름과 매칭
+  criticality: "High"
+  rtSettings:
+    period: 20000
+    runtime_low: 4000      # 4ms runtime
+    runtime_hi: 4000       # 4ms runtime
+    core: "2"           # Use core 2
+
+---
+apiVersion: mcoperator.sdv.com/v1
+kind: McKube
+metadata:
+  name: example-realtime-data-c
+  namespace: default
+spec:
+  podname: "eq-task-statefulset-3"  # StatefulSet Pod 이름과 매칭
+  criticality: "High"
+  rtSettings:
+    period: 20000
+    runtime_low: 4000      # 4ms runtime
+    runtime_hi: 4000       # 4ms runtime
+    core: "3"           # Use core 2

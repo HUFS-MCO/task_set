@@ -1,0 +1,42 @@
+# 3가지 criticality별로 StatefulSet 생성 (각각 다른 replicas)
+{{- range .Values.criticalityLevels }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "eq-task-chart.fullname" $ }}-{{ .name }}
+  namespace: {{ $.Values.namespace }}
+spec:
+  replicas: {{ .replicas }}  # 각 criticality별 개별 replicas
+  selector:
+    matchLabels:
+      app: {{ include "eq-task-chart.name" $ }}-{{ .name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "eq-task-chart.name" $ }}-{{ .name }}
+        sdv.com: {{ .label }}  # high-app, middle-app, low-app
+    spec:
+      containers:
+      - name: eq-task
+        image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+        imagePullPolicy: {{ $.Values.image.pullPolicy }}
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            sleep 300
+            /app/eq_task
+            echo "Task completed. Keeping container alive..."
+            exec /bin/bash
+        securityContext:
+          capabilities:
+            add:
+            - SYS_NICE
+        env:
+        - name: WORKLOAD
+          value: "{{ $.Values.task.workload }}"
+        - name: ITERATIONS
+          value: "{{ $.Values.task.iterations }}"
+        stdin: true
+        tty: true
+{{- end }}

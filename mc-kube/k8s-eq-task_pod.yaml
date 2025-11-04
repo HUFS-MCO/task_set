@@ -1,0 +1,146 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: eq-task-statefulset-11
+  namespace: default
+  labels:
+    app: eq-task
+    sdv.com: example-realtime-data
+spec:
+  containers:
+  - name: eq-task
+    image: ghcr.io/hufs-mco/test-task:equal
+    imagePullPolicy: Always
+    # Run task and keep shell open
+    command: ["/bin/bash", "-c"]
+    args:
+      - |
+        sleep 5
+        /app/eq_task
+        echo "Task completed. Keeping container alive..."
+        exec /bin/bash
+    # SCHED_DEADLINE requires privileged access for syscalls
+    securityContext:
+      capabilities:
+        add:
+        - SYS_NICE
+    env:
+    # Task configuration
+    - name: WORKLOAD
+      value: "380"          # DummyTask iterations (workload size)
+    - name: ITERATIONS
+      value: "3000"          # Number of task executions
+    # Keep container running after task completes
+    stdin: true
+    tty: true
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: eq-task-statefulset-1
+  namespace: default
+  labels:
+    app: eq-task
+    sdv.com: example-realtime-data
+spec:
+  containers:
+  - name: eq-task
+    image: ghcr.io/hufs-mco/test-task:equal
+    imagePullPolicy: Always
+    # Run task and keep shell open
+    command: ["/bin/bash", "-c"]
+    args:
+      - |
+        sleep 5
+        /app/eq_task
+        echo "Task completed. Keeping container alive..."
+        exec /bin/bash
+    # SCHED_DEADLINE requires privileged access for syscalls
+    securityContext:
+      capabilities:
+        add:
+        - SYS_NICE
+    env:
+    # Task configuration
+    - name: WORKLOAD
+      value: "380"          # DummyTask iterations (workload size)
+    - name: ITERATIONS
+      value: "3000"          # Number of task executions
+    # Keep container running after task completes
+    stdin: true
+    tty: true
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: eq-task-statefulset-2
+  namespace: default
+  labels:
+    app: eq-task
+    sdv.com: example-realtime-data
+spec:
+  containers:
+  - name: eq-task
+    image: ghcr.io/hufs-mco/test-task:equal
+    imagePullPolicy: Always
+    # Run task and keep shell open
+    command: ["/bin/bash", "-c"]
+    args:
+      - |
+        sleep 5
+        /app/eq_task
+        echo "Task completed. Keeping container alive..."
+        exec /bin/bash
+    # SCHED_DEADLINE requires privileged access for syscalls
+    securityContext:
+      capabilities:
+        add:
+        - SYS_NICE
+    env:
+    # Task configuration
+    - name: WORKLOAD
+      value: "380"          # DummyTask iterations (workload size)
+    - name: ITERATIONS
+      value: "3000"          # Number of task executions
+    # Keep container running after task completes
+    stdin: true
+    tty: true
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: eq-task-statefulset-3
+  namespace: default
+  labels:
+    app: eq-task
+    sdv.com: example-realtime-data
+spec:
+  containers:
+  - name: eq-task
+    image: ghcr.io/hufs-mco/test-task:equal
+    imagePullPolicy: Always
+    # Run task and keep shell open
+    command: ["/bin/bash", "-c"]
+    args:
+      - |
+        sleep 5
+        /app/eq_task
+        echo "Task completed. Keeping container alive..."
+        exec /bin/bash
+    # SCHED_DEADLINE requires privileged access for syscalls
+    securityContext:
+      capabilities:
+        add:
+        - SYS_NICE
+    env:
+    # Task configuration
+    - name: WORKLOAD
+      value: "380"          # DummyTask iterations (workload size)
+    - name: ITERATIONS
+      value: "3000"          # Number of task executions
+    # Keep container running after task completes
+    stdin: true
+    tty: true

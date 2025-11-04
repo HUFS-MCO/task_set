@@ -1,0 +1,20 @@
+# 3가지 criticality별로 McKube 리소스들을 각각의 replicas 수만큼 자동 생성
+{{- range .Values.criticalityLevels }}
+{{- $level := . }}
+{{- range $i := until (int .replicas) }}
+---
+apiVersion: mcoperator.sdv.com/v1
+kind: McKube
+metadata:
+  name: {{ include "eq-task-chart.fullname" $ }}-{{ $level.name }}-{{ $i }}
+  namespace: {{ $.Values.namespace }}
+spec:
+  podname: "{{ include "eq-task-chart.fullname" $ }}-{{ $level.name }}-{{ $i }}"  # StatefulSet pod naming pattern
+  criticality: "{{ $level.criticality }}"  # High, Middle, Low
+  rtSettings:
+    period: {{ $level.rtSettings.period }}
+    runtime_low: {{ $level.rtSettings.runtime_low }}
+    runtime_hi: {{ $level.rtSettings.runtime_hi }}
+    core: "{{ mod (add $level.rtSettings.coreStart $i) 16 }}"  # 각 criticality별 core 범위 (0-15)
+{{- end }}
+{{- end }}

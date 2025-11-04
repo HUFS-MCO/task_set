@@ -1,0 +1,44 @@
+# Default values for eq-task-chart
+# replicaCount 제거 - 각 criticality별로 개별 설정
+
+image:
+  repository: ghcr.io/hufs-mco/test-task
+  tag: equal
+  pullPolicy: Always
+
+# Task configuration
+task:
+  workload: "380"
+  iterations: "3000"
+
+# McKube RT settings - 3가지 criticality 설정
+criticalityLevels:
+  - name: "high"
+    criticality: "High"
+    label: "high-app"
+    replicas: 16  # High는 16개
+    rtSettings:
+      period: 20000
+      runtime_low: 4000
+      runtime_hi: 4000
+      coreStart: 0  # Core 2부터 시작
+  - name: "middle"
+    criticality: "Middle"
+    label: "middle-app"
+    replicas: 24  # Middle은 24개
+    rtSettings:
+      period: 25000
+      runtime_low: 4000
+      runtime_hi: 4000
+      coreStart: 0  # Core 5부터 시작
+  - name: "low"
+    criticality: "Low"
+    label: "low-app"
+    replicas: 32  # Low는 32개
+    rtSettings:
+      period: 33000
+      runtime_low: 4000
+      runtime_hi: 4000
+      coreStart: 0  # Core 8부터 시작
+
+namespace: default

@@ -1,0 +1,59 @@
+apiVersion: mcoperator.sdv.com/v1
+kind: McKube
+metadata:
+  name: example-realtime-data
+  namespace: default
+spec:
+  podname: "eq-task-statefulset-0"  # StatefulSet Pod 이름과 매칭
+  criticality: "High"
+  rtSettings:
+    period: 20000
+    runtime_low: 4000      # 4ms runtime
+    runtime_hi: 4000       # 4ms runtime
+    core: "2"           # Use core 2
+---
+# StatefulSet 본체 (Service 없이도 predictable naming 유지)
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: eq-task-statefulset
+  namespace: default
+spec:
+  # serviceName 제거 - 네트워크 통신 불필요
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eq-task                  # template labels와 일치 필수
+  template:
+    metadata:
+      labels:
+        app: eq-task
+        sdv.com: example-realtime-data
+    spec:
+      containers:
+      - name: eq-task
+        image: ghcr.io/hufs-mco/test-task:equal
+        imagePullPolicy: Always
+        # Run task and keep shell open
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            sleep 5
+            /app/eq_task
+            echo "Task completed. Keeping container alive..."
+            exec /bin/bash
+        # SCHED_DEADLINE requires privileged access for syscalls
+        securityContext:
+          capabilities:
+            add:
+            - SYS_NICE
+        env:
+        # Task configuration
+        - name: WORKLOAD
+          value: "380"          # DummyTask iterations (workload size)
+        - name: ITERATIONS
+          value: "3000"          # Number of task executions
+        # Keep container running after task completes
+        stdin: true
+        tty: true
+
