@@ -1,11 +1,11 @@
 apiVersion: scheduling.francescol96.univr/v1
 kind: RealTime
 metadata:
-  name: example-realtime-data
+  name: example-realtime-data-b
 spec:
-  criticality: C
-  rtPeriod: 20
-  rtDeadline: 20
+  criticality: B
+  rtPeriod: 25
+  rtDeadline: 25
   rtWcets:
     - node: nodeA
       rtWcet: 4
@@ -13,11 +13,12 @@ spec:
       rtWcet: 4
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: eq-task-sched-deadline
+  name: eq-task-sched-deadline-b
 spec:
-  replicas: 1
+  serviceName: eq-task-b
+  replicas: 24
   selector:
     matchLabels:
       app: eq-task
@@ -25,11 +26,11 @@ spec:
     metadata:
       labels:
         app: eq-task
-        scheduling.francescol96.univr: example-realtime-data
+        scheduling.francescol96.univr: example-realtime-data-b
     spec:
       serviceAccountName: eq-task-monitoring-sa
       containers:
-      - name: eq-task
+      - name: eq-task-b
         image: ghcr.io/hufs-mco/rt-kube-task:equal
         imagePullPolicy: Always
         # Run task and keep shell open
@@ -56,17 +57,19 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
+        - name: ENABLE_MONITORING
+          value: "false"
         # Task configuration
         - name: RUNTIME_MS
           value: "4"            # SCHED_DEADLINE runtime budget in ms
         - name: DEADLINE_MS
-          value: "20"           # SCHED_DEADLINE deadline in ms  
+          value: "25"           # SCHED_DEADLINE deadline in ms  
         - name: PERIOD_MS
-          value: "20"           # SCHED_DEADLINE period in ms
+          value: "25"           # SCHED_DEADLINE period in ms
         - name: WORKLOAD
-          value: "500"          # DummyTask iterations (workload size)
+          value: "380"          # DummyTask iterations (workload size)
         - name: ITERATIONS
-          value: "1500"          # Number of task executions
+          value: "30000"          # Number of task executions
         # Keep container running after task completes
         stdin: true
         tty: true

@@ -16,6 +16,14 @@
 #include <linux/types.h>
 #include "monitoring.h"
 
+// Global variable for SIGXCPU counting when monitoring is disabled
+int sigxcpu_counter1 = 0;
+
+// Simple SIGXCPU handler for non-monitoring mode
+void simple_sigxcpu_handler(int sig) {
+    sigxcpu_counter1++;
+}
+
 //#define gettid() syscall(SYS_gettid)
 #define RUNTIME_NS  (4ULL * 1000 * 1000)    // 4ms
 #define DEADLINE_NS (20ULL * 1000 * 1000)   // 20ms
@@ -64,7 +72,17 @@ int main() {
     attr.sched_deadline = deadline_ns;
     attr.sched_period = period_ns;
 
-    monitor();
+    // Check if monitoring is enabled
+    const char* monitoring_env = getenv("ENABLE_MONITORING");
+    bool enable_monitoring = monitoring_env && (strcmp(monitoring_env, "true") == 0 || strcmp(monitoring_env, "1") == 0);
+    
+    if (enable_monitoring) {
+        printf("📊 Monitoring enabled\n");
+        monitor();
+    } else {
+        printf("📊 Monitoring disabled (simple SIGXCPU counting only)\n");
+        signal(SIGXCPU, simple_sigxcpu_handler);
+    }
 
     printf("sizeof(attr) = %zu\n", sizeof(attr));
     printf("🟢 SCHED_DEADLINE test starting (tid=%ld)\n", (long)syscall(SYS_gettid));
@@ -94,6 +112,7 @@ int main() {
     std::ofstream cycle_file("eq_cycle_times.csv");
     cycle_file << "cycle_elapsed_ms\n";
 
+    sched_yield();
     // 4. 주기적 루프 (예: 100번 반복)
     for (int i = 0; i < num_iterations; ++i) {
         auto cycle_start = current_time_ms();

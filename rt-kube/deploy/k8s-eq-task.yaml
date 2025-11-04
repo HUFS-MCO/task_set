@@ -1,0 +1,76 @@
+apiVersion: scheduling.francescol96.univr/v1
+kind: RealTime
+metadata:
+  name: example-realtime-data
+spec:
+  criticality: C
+  rtPeriod: 20
+  rtDeadline: 20
+  rtWcets:
+    - node: nodeA
+      rtWcet: 4
+    - node: nodeB
+      rtWcet: 4
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: eq-task-sched-deadline
+spec:
+  serviceName: eq-task
+  replicas: 16
+  selector:
+    matchLabels:
+      app: eq-task
+  template:
+    metadata:
+      labels:
+        app: eq-task
+        scheduling.francescol96.univr: example-realtime-data
+    spec:
+      serviceAccountName: eq-task-monitoring-sa
+      containers:
+      - name: eq-task
+        image: ghcr.io/hufs-mco/rt-kube-task:equal
+        imagePullPolicy: Always
+        # Run task and keep shell open
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            /app/eq_task
+            echo "Task completed. Keeping container alive..."
+            exec /bin/bash
+        # SCHED_DEADLINE requires privileged access for syscalls
+        securityContext:
+          privileged: true
+          capabilities:
+            add:
+            - SYS_NICE
+            - SYS_ADMIN
+        # Environment variables for monitoring.h (K8s API access)
+        env:
+        - name: NODENAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        # Task configuration
+        - name: ENABLE_MONITORING
+          value: "true"
+        - name: RUNTIME_MS
+          value: "4"            # SCHED_DEADLINE runtime budget in ms 4
+        - name: DEADLINE_MS
+          value: "20"           # SCHED_DEADLINE deadline in ms  
+        - name: PERIOD_MS
+          value: "20"           # SCHED_DEADLINE period in ms
+        - name: WORKLOAD
+          value: "380"          # DummyTask iterations (workload size) 380
+        - name: ITERATIONS
+          value: "30000"          # Number of task executions
+        # Keep container running after task completes
+        stdin: true
+        tty: true
+
