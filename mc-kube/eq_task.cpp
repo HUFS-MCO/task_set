@@ -59,7 +59,7 @@ int main() {
 
     DummyTask eq_func("EQ_Function", workload);
     std::ofstream cycle_file("eq_cycle_times.csv");
-    cycle_file << "cycle_elapsed_ms\n";
+    cycle_file << "cycle_response_ms" << "\n";
 
     std::cout << "-------[eq main start]-------" << std::endl;
 
@@ -67,7 +67,9 @@ int main() {
     clock_gettime(CLOCK_MONOTONIC, &next_activation);
     timespec_add_ns(next_activation, PERIOD_NS);
 
+
     for (int i = 0; i < num_iterations; ++i) {
+        timespec_add_ns(next_activation, PERIOD_NS);
         auto cycle_start = current_time_ms();
 
         // 태스크 실행
@@ -76,17 +78,16 @@ int main() {
         auto cycle_end = current_time_ms();
         auto cycle_elapsed = cycle_end - cycle_start;
 
-        cycle_file << cycle_elapsed << "\n";
+        cycle_file << cycle_elapsed <<"\n";
         cycle_file.flush();
 
         eq_func.reset();
-
-        timespec_add_ns(next_activation, PERIOD_NS);
 
         int ret;
         do {
             ret = clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_activation, NULL);
         } while (ret == EINTR);
+
     }
 
     cycle_file.close();
