@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: eq-task-low
+spec:
+  serviceName: eq-task
+  replicas: 32
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      app: eq-task-low
+  template:
+    metadata:
+      labels:
+        app: eq-task-low
+    spec:
+      containers:
+      - name: eq-task
+        image: ghcr.io/hufs-mco/vanila-task:equal
+        imagePullPolicy: Always
+        # Run task and keep shell open
+        command: ["/bin/bash", "-c"]
+        args:
+          - |
+            /app/eq_task
+            echo "Task completed. Keeping container alive..."
+            exec /bin/bash
+        # Environment variables for monitoring.h (K8s API access)
+        securityContext:
+          capabilities:
+            add:
+            - SYS_NICE
+        env:
+        # Task configuration
+        - name: RUNTIME_MS
+          value: "4"            # SCHED_DEADLINE runtime budget in ms 4
+        - name: PERIOD_MS
+          value: "33"           # SCHED_DEADLINE period in ms
+        - name: WORKLOAD
+          value: "380"          # DummyTask iterations (workload size) 380
+        - name: ITERATIONS
+          value: "10000"          # Number of task executions
+        # Keep container running after task completes
+        stdin: true
+        tty: true
+
